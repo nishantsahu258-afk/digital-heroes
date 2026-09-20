@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --background: 60 20% 98%; /* #FAFAF8 approx */
+    --foreground: 221 50% 9%; /* Dark navy */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 221 50% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 50% 9%;
+
+    /* Primary: Forest Green */
+    --primary: 139 16% 29%; /* #3E5746 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Dark Navy */
+    --secondary: 221 50% 9%; /* #0B1221 */
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent: Gold / Champagne */
+    --accent: 38 42% 62%; /* #C7A977 */
+    --accent-foreground: 221 50% 9%;
+
+    --muted: 60 10% 92%;
+    --muted-foreground: 220 10% 40%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 60 10% 85%;
+    --input: 60 10% 85%;
+    --ring: 139 16% 29%;
+
+    --radius: 0.75rem; /* Rounded corners as seen in cards */
+  }
+
+  .dark {
+    --background: 221 50% 9%;
+    --foreground: 60 20% 98%;
+
+    --card: 221 50% 12%;
+    --card-foreground: 60 20% 98%;
+
+    --popover: 221 50% 12%;
+    --popover-foreground: 60 20% 98%;
+
+    --primary: 139 16% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 221 50% 15%;
+    --secondary-foreground: 60 20% 98%;
+
+    --muted: 221 50% 15%;
+    --muted-foreground: 60 10% 70%;
+
+    --accent: 38 42% 62%;
+    --accent-foreground: 221 50% 9%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 221 50% 15%;
+    --input: 221 50% 15%;
+    --ring: 139 16% 35%;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-primary;
+  }
+}
