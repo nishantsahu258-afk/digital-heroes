@@ -103,8 +103,10 @@ export default function Charities() {
 
         {/* Grid */}
         <section className="px-8 max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-6 mb-16">
-            {causes.map(cause => (
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            {causes.map((cause, index) => {
+              const category = ['ENVIRONMENT', 'HEALTH', 'EDUCATION', 'COMMUNITY'][index % 4]
+              return (
               <Card key={cause.id} className={`border-foreground/5 shadow-sm overflow-hidden flex flex-col sm:flex-row h-full ${profile?.charity_id === cause.id ? 'ring-2 ring-primary' : ''}`}>
                 <div className="w-full sm:w-2/5 h-48 sm:h-auto bg-foreground/5 shrink-0 flex items-center justify-center overflow-hidden">
                   {cause.image_url ? (
@@ -116,7 +118,7 @@ export default function Charities() {
                 <CardContent className="p-8 flex flex-col flex-1">
                   <div className="flex justify-between items-start mb-4">
                     <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">
-                      VERIFIED
+                      {category}
                     </span>
                     <span className="text-xs font-bold text-foreground/60">
                       Raised: <span className="text-foreground">£{formatGBP(cause.total_raised)}</span>
@@ -129,7 +131,7 @@ export default function Charities() {
                   
                   {profile && profile.charity_id !== cause.id ? (
                      <Button onClick={() => handleSelectCharity(cause.id)} variant="outline" className="w-fit text-sm font-medium border-foreground/10 text-foreground">
-                       Select as My Cause
+                       Learn More & Partner
                      </Button>
                   ) : profile && profile.charity_id === cause.id ? (
                      <Button disabled variant="outline" className="w-fit text-sm font-medium border-primary bg-primary/10 text-primary">
@@ -137,12 +139,17 @@ export default function Charities() {
                      </Button>
                   ) : (
                      <Button variant="outline" className="w-fit text-sm font-medium border-foreground/10 text-foreground">
-                       Login to Select
+                       Learn More & Partner
                      </Button>
                   )}
                 </CardContent>
               </Card>
-            ))}
+            )})}
+          </div>
+          <div className="flex justify-center mb-16">
+            <Button variant="outline" className="rounded-full px-8 text-xs font-bold border-foreground/20 text-foreground">
+              Load More Causes
+            </Button>
           </div>
         </section>
       </main>
