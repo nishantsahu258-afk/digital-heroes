@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { authService } from '@/services/authService'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function Subscription() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +28,7 @@ export default function Subscription() {
 
   const handleSubscribe = async (tier: 'monthly' | 'yearly') => {
     if (!user) {
-      setError('You must be logged in to subscribe')
+      navigate('/login?redirect=subscription')
       return
     }
     
@@ -190,7 +192,7 @@ export default function Subscription() {
           <p className="text-foreground/70 text-sm mb-6 max-w-xl mx-auto">
             Not ready to subscribe? You can still make a difference. 100% of independent donations go directly to the verified charity pool without participating in the monthly draw.
           </p>
-          <Button variant="outline" className="h-10 text-sm font-medium rounded-md border-primary text-primary hover:bg-primary/5">
+          <Button onClick={() => setError('Direct donation checkout is currently unavailable until payment processing is configured.')} variant="outline" className="h-10 text-sm font-medium rounded-md border-primary text-primary hover:bg-primary/5">
             Make a Direct Donation
           </Button>
         </section>

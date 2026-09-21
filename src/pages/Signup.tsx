@@ -47,6 +47,13 @@ export default function Signup() {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: fullName,
+          handicap: handicap,
+          charity_id: charity
+        }
+      }
     })
 
     if (authError) {
@@ -56,24 +63,6 @@ export default function Signup() {
     }
 
     if (authData.user) {
-      // In a real app, charity_id would come from DB. We'll use a placeholder UUID or null if not enforced yet.
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          { 
-            id: authData.user.id, 
-            email: authData.user.email,
-            role: 'user',
-            charity_contribution_percent: 10
-          }
-        ])
-
-      if (profileError) {
-        setError("Account created but failed to create profile: " + profileError.message)
-        setLoading(false)
-        return
-      }
-
       navigate('/dashboard')
     }
   }

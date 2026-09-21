@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '@/layouts/Navbar'
 import { Footer } from '@/layouts/Footer'
@@ -133,8 +133,8 @@ export default function Dashboard() {
   const isVerified = subscription?.status === 'active'
   const isAnnual = subscription?.tier === 'yearly'
   const planName = isAnnual ? 'Annual Hero' : (subscription ? 'Monthly Hero' : 'Free Tier')
-  const planPrice = isAnnual ? 'Â£99.99/yr' : 'Â£9.99/mo'
-  const directContribution = isAnnual ? 'Â£10.00' : 'Â£1.00'
+  const planPrice = isAnnual ? '£99.99/yr' : '£9.99/mo'
+  const directContribution = isAnnual ? '£10.00' : '£1.00'
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -267,7 +267,7 @@ export default function Dashboard() {
               
               <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Your Direct Contribution</div>
               <div className="text-xl font-serif text-foreground mb-8">
-                {subscription ? directContribution : 'Â£0.00'} <span className="text-sm font-sans text-foreground/50">(From fee)</span>
+                {subscription ? directContribution : '£0.00'} <span className="text-sm font-sans text-foreground/50">(From fee)</span>
               </div>
 
               <div className="border-t border-foreground/5 pt-6">

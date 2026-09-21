@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '@/layouts/Navbar'
+import { formatGBP } from '@/lib/utils'
 import { Footer } from '@/layouts/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -82,7 +83,7 @@ export default function WinnerVerification() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-serif text-foreground mb-3">Claim Your Winnings</h1>
             <p className="text-foreground/70 text-sm max-w-sm mx-auto leading-relaxed">
-              Upload proof of your scores to verify your Match {winner.match_count} win of £{winner.prize_amount.toLocaleString(undefined, {minimumFractionDigits: 2})}.
+              Upload proof of your scores to verify your Match {winner.match_count} win of £{formatGBP(winner.prize_amount, 2)}.
             </p>
           </div>
 

@@ -8,6 +8,7 @@ import { drawService } from '@/services/drawService'
 import { charityService } from '@/services/charityService'
 import type { Draw, DrawEntry, Winner, Charity } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
+import { formatGBP } from '@/lib/utils'
 
 export default function Draws() {
   const { profile } = useAuth()
@@ -79,7 +80,7 @@ export default function Draws() {
               </div>
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize Pool</div>
-                <div className="font-bold text-foreground">£{draw.total_pool.toLocaleString()}</div>
+                <div className="font-bold text-foreground">£{formatGBP(draw.total_pool)}</div>
               </div>
             </div>
           </div>
@@ -116,7 +117,7 @@ export default function Draws() {
                       <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40">40% of Pool</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-serif text-accent mb-1">£{draw.tier_5_amount.toLocaleString()}</div>
+                      <div className="text-2xl font-serif text-accent mb-1">£{formatGBP(draw.tier_5_amount)}</div>
                       <div className="text-xs text-foreground/60">Total Payout</div>
                     </div>
                   </div>
@@ -131,7 +132,7 @@ export default function Draws() {
                       <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40">35% of Pool</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-serif text-foreground mb-1">£{draw.tier_4_amount.toLocaleString()}</div>
+                      <div className="text-2xl font-serif text-foreground mb-1">£{formatGBP(draw.tier_4_amount)}</div>
                       <div className="text-xs text-foreground/60">Total Payout</div>
                     </div>
                   </div>
@@ -146,7 +147,7 @@ export default function Draws() {
                       <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40">25% of Pool</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-serif text-foreground mb-1">£{draw.tier_3_amount.toLocaleString()}</div>
+                      <div className="text-2xl font-serif text-foreground mb-1">£{formatGBP(draw.tier_3_amount)}</div>
                       <div className="text-xs text-foreground/60">Total Payout</div>
                     </div>
                   </div>
@@ -161,7 +162,7 @@ export default function Draws() {
                       <div className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Guaranteed Donation</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-serif text-primary mb-1">£{charityPot.toLocaleString()}</div>
+                      <div className="text-2xl font-serif text-primary mb-1">£{formatGBP(charityPot)}</div>
                       <div className="text-xs text-primary/60">Allocated</div>
                     </div>
                   </div>
@@ -209,7 +210,7 @@ export default function Draws() {
                       <>
                         <div className="bg-accent/10 border border-accent/20 rounded-md p-4 text-center mb-6">
                           <div className="text-xs font-bold uppercase tracking-widest text-accent mb-1">You Won</div>
-                          <div className="text-3xl font-serif text-accent">£{winnings.prize_amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                          <div className="text-3xl font-serif text-accent">£{formatGBP(winnings.prize_amount, 2)}</div>
                         </div>
 
                         <Button asChild className="w-full h-12 bg-primary text-white hover:bg-primary/90 text-base mb-4">

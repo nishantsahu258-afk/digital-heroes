@@ -15,11 +15,13 @@ export default function Home() {
   const [totalPrizePool, setTotalPrizePool] = useState<number>(0)
   const [currentEntries, setCurrentEntries] = useState<number>(0)
   const [targetDate, setTargetDate] = useState<string | undefined>()
+  const [featuredCharity, setFeaturedCharity] = useState<any>(null)
 
   useEffect(() => {
     async function loadData() {
       try {
         const charities = await charityService.getCharities()
+        if (charities.length > 0) setFeaturedCharity(charities[0])
         const total = charities.reduce((acc, c) => acc + (c.total_raised || 0), 0)
         setTotalRaised(total > 0 ? total : 127450) // fallback to demo value if 0
 
@@ -264,15 +266,25 @@ export default function Home() {
 
           <Card className="border-foreground/5 shadow-xl shadow-black/5 overflow-hidden">
             <div className="grid md:grid-cols-2">
-              <div className="h-64 md:h-auto bg-foreground/5 w-full object-cover transition-transform duration-300 hover:scale-[1.03]"></div>
+              <div className="h-64 md:h-auto bg-foreground/5 w-full object-cover transition-transform duration-300 hover:scale-[1.03] overflow-hidden">
+                {featuredCharity && featuredCharity.image_url ? (
+                  <img src={featuredCharity.image_url} alt="Featured Charity" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-foreground/20 text-6xl">♥</div>
+                )}
+              </div>
               <div className="p-10 lg:p-16 flex flex-col justify-center">
                 <div className="flex gap-3 mb-6">
-                  <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">Environment & Sustainability</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">
+                    {featuredCharity && featuredCharity.category ? featuredCharity.category : 'Environment & Sustainability'}
+                  </span>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 py-1">Featured Partner</span>
                 </div>
-                <h3 className="text-3xl font-serif text-foreground mb-4">Clean Water Initiative</h3>
+                <h3 className="text-3xl font-serif text-foreground mb-4">
+                  {featuredCharity ? featuredCharity.name : 'Clean Water Initiative'}
+                </h3>
                 <p className="text-foreground/70 leading-relaxed mb-10">
-                  Providing sustainable solar-powered filtration systems to remote communities. Every premium subscription logged contributes directly to building infrastructure on the ground.
+                  {featuredCharity ? featuredCharity.description : 'Providing sustainable solar-powered filtration systems to remote communities.'}
                 </p>
                 
                 <div className="flex gap-12 mb-10">

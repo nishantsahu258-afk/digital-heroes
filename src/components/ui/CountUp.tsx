@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, useSpring, useTransform, useReducedMotion } from 'framer-motion'
+import { formatGBP } from '@/lib/utils'
 
 interface CountUpProps {
   end: number
@@ -29,16 +30,13 @@ export function CountUp({ end, duration = 1.2, delay = 0, prefix = '', suffix = 
   }, [inView, end, prefersReducedMotion, springValue, delay])
 
   const displayValue = useTransform(springValue, (current) => {
-    return prefix + current.toLocaleString(undefined, {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
-    }) + suffix
+    return prefix + formatGBP(current, decimals) + suffix
   })
 
   if (prefersReducedMotion) {
     return (
       <span className="inline-block">
-        {prefix}{end.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}
+        {prefix}{formatGBP(end, decimals)}{suffix}
       </span>
     )
   }

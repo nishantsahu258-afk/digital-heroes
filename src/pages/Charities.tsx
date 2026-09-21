@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { charityService } from '@/services/charityService'
-import { useAuth } from '@/contexts/AuthContext'
 import type { Charity } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
+import { formatGBP } from '@/lib/utils'
 
 export default function Charities() {
   const { profile } = useAuth()
@@ -56,7 +57,7 @@ export default function Charities() {
                 Collective Power
               </div>
               <h1 className="text-4xl md:text-5xl font-serif leading-tight">
-                £{totalRaised.toLocaleString()} raised across {causes.length} partner charities.
+                £{formatGBP(totalRaised)} raised across {causes.length} partner charities.
               </h1>
             </div>
             <div className="flex gap-12">
@@ -118,7 +119,7 @@ export default function Charities() {
                       VERIFIED
                     </span>
                     <span className="text-xs font-bold text-foreground/60">
-                      Raised: <span className="text-foreground">£{cause.total_raised.toLocaleString()}</span>
+                      Raised: <span className="text-foreground">£{formatGBP(cause.total_raised)}</span>
                     </span>
                   </div>
                   <h3 className="text-2xl font-serif text-foreground mb-3">{cause.name}</h3>
