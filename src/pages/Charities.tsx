@@ -109,11 +109,16 @@ export default function Charities() {
               return (
               <Card key={cause.id} className={`border-foreground/10 rounded-2xl shadow-sm overflow-hidden flex flex-col sm:flex-row h-full ${profile?.charity_id === cause.id ? 'ring-2 ring-primary' : ''}`}>
                 <div className="w-full sm:w-1/2 h-48 sm:h-auto bg-foreground/5 shrink-0 flex items-center justify-center overflow-hidden">
-                  {cause.image_url ? (
-                    <img src={cause.image_url} alt={cause.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]" />
-                  ) : (
-                    <div className="text-foreground/20 text-4xl transition-transform duration-300 hover:scale-[1.03]">♥</div>
-                  )}
+                  <img
+                    src={cause.image_url || [
+                      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&q=80", // Environment/Water
+                      "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80", // Health/Medical
+                      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=400&fit=crop&q=80", // Education/Books
+                      "https://images.unsplash.com/photo-1587174486073-ae5e1c47f123?w=600&h=400&fit=crop&q=80"  // Community/Golf
+                    ][index % 4]}
+                    alt={cause.name}
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]"
+                  />
                 </div>
                 <CardContent className="p-8 flex flex-col flex-1 sm:w-1/2 justify-center">
                   <div className="flex justify-between items-center mb-4">

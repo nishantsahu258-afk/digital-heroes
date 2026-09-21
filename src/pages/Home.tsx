@@ -299,7 +299,7 @@ export default function Home() {
                 <img
                   src={
                     featuredCharity?.image_url ||
-                    "https://images.unsplash.com/photo-1541802645635-11f2286a7482?w=800&h=600&fit=crop&q=80"
+                    "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&h=600&fit=crop&q=80"
                   }
                   alt={featuredCharity?.name || "Featured Charity"}
                   className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.04]"
@@ -357,7 +357,7 @@ export default function Home() {
                 </p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary">
-                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop" alt="Sarah Jenkins" className="w-full h-full object-cover" />
+                    <img src="https://images.unsplash.com/photo-1530259152377-3a014e1092d0?w=150&h=150&fit=crop" alt="Sarah Jenkins" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground">Sarah Jenkins</div>
@@ -373,7 +373,7 @@ export default function Home() {
                 </p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary">
-                    <img src="https://images.unsplash.com/photo-1537368910025-7028a4ce2df0?w=150&h=150&fit=crop" alt="Dr. Aris Vance" className="w-full h-full object-cover" />
+                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop" alt="Dr. Aris Vance" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground">Dr. Aris Vance</div>
