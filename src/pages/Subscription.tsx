@@ -3,18 +3,64 @@ import { Navbar } from '@/layouts/Navbar'
 import { Footer } from '@/layouts/Footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { motion } from 'framer-motion'
+import { Input } from '@/components/ui/input'
+import { motion, AnimatePresence } from 'framer-motion'
 import { authService } from '@/services/authService'
+import { charityService } from '@/services/charityService'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import type { Charity } from '@/types'
+import { formatGBP } from '@/lib/utils'
 
 export default function Subscription() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const navigate = useNavigate()
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  // Demo Checkout State
+  const [demoCheckoutTier, setDemoCheckoutTier] = useState<'monthly' | 'yearly' | null>(null)
+  const [demoActivating, setDemoActivating] = useState(false)
+
+  // Demo Donation State
+  const [showDonationModal, setShowDonationModal] = useState(false)
+  const [charities, setCharities] = useState<Charity[]>([])
+  const [selectedCharityId, setSelectedCharityId] = useState<string>('')
+  const [donationAmount, setDonationAmount] = useState<number>(25)
+  const [customAmount, setCustomAmount] = useState<string>('')
+  const [donating, setDonating] = useState(false)
+
+  // FAQ Accordion State
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
+
+  const toggleFaq = (index: number) => {
+    setOpenFaq(prev => (prev === index ? null : index))
+  }
+
+  const faqs = [
+    {
+      question: "How is the 10% charity donation verified?",
+      answer: "Every contribution is handled via our licensed integration partner and directly sent to registered charity escrow accounts. Statements are updated in real-time."
+    },
+    {
+      question: "What score formats do you support?",
+      answer: "We currently support official Stableford point scores (1 to 45 points) logged from any 18-hole or 9-hole affiliated golf course. Scores are validated and matched against your monthly draw entry code."
+    },
+    {
+      question: "How does the monthly prize draw work?",
+      answer: "Each month, your 5 submitted Stableford scores generate your unique draw entry numbers. At the end of the month, 5 winning numbers are published. Match 3, 4, or 5 numbers to win from the guaranteed structured prize pool."
+    },
+    {
+      question: "Can I change my nominated charity cause?",
+      answer: "Yes, you can change your designated charity partner at any time directly from your Member Dashboard or the Charities page with 1-click."
+    },
+    {
+      question: "How do I claim and verify my prize payout?",
+      answer: "Winners upload a clear photo or screenshot of their signed scorecard in the Winner Verification portal. Once verified by compliance, funds are deposited directly into your nominated UK bank or international account."
+    }
+  ]
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -24,7 +70,15 @@ export default function Subscription() {
     if (params.get('checkout') === 'success') {
       setSuccess('Subscription successful! Welcome to the premium tier.')
     }
-  }, [])
+
+    // Load charities for donation modal
+    charityService.getCharities().then(list => {
+      setCharities(list)
+      if (list.length > 0) {
+        setSelectedCharityId(profile?.charity_id || list[0].id)
+      }
+    }).catch(console.error)
+  }, [profile])
 
   const handleSubscribe = async (tier: 'monthly' | 'yearly') => {
     if (!user) {
@@ -36,11 +90,69 @@ export default function Subscription() {
     setError(null)
     
     try {
+      // Try real Stripe session first
       const url = await authService.createCheckoutSession(tier)
-      window.location.href = url
+      if (url && url.startsWith('http')) {
+        window.location.href = url
+        return
+      }
+      // If no valid URL returned, open demo checkout
+      setDemoCheckoutTier(tier)
     } catch (err: any) {
-      setError(err.message || 'Failed to start checkout')
+      // Real Stripe is unavailable in this environment, fallback seamlessly to clear Demo Checkout
+      console.log('Stripe checkout unavailable, opening Demo Checkout modal:', err.message)
+      setDemoCheckoutTier(tier)
+    } finally {
       setLoading(false)
+    }
+  }
+
+  const handleConfirmDemoSubscription = async () => {
+    if (!demoCheckoutTier || !user) return
+    setDemoActivating(true)
+    setError(null)
+    try {
+      await authService.activateDemoSubscription(demoCheckoutTier)
+      setSuccess(`Demo ${demoCheckoutTier === 'yearly' ? 'Annual Hero' : 'Monthly Supporter'} subscription activated successfully!`)
+      setDemoCheckoutTier(null)
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 1200)
+    } catch (err: any) {
+      setError(err.message || 'Failed to activate demo subscription')
+    } finally {
+      setDemoActivating(false)
+    }
+  }
+
+  const handleConfirmDemoDonation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user) {
+      navigate('/login?redirect=subscription')
+      return
+    }
+    const finalAmount = customAmount ? parseFloat(customAmount) : donationAmount
+    if (isNaN(finalAmount) || finalAmount <= 0) {
+      setError('Please select or enter a valid donation amount.')
+      return
+    }
+    if (!selectedCharityId) {
+      setError('Please select a charity cause to support.')
+      return
+    }
+
+    setDonating(true)
+    setError(null)
+    try {
+      await charityService.recordDemoDonation(selectedCharityId, finalAmount)
+      const selectedCharity = charities.find(c => c.id === selectedCharityId)
+      setSuccess(`Demo donation of £${formatGBP(finalAmount)} to ${selectedCharity?.name || 'partner charity'} confirmed! (No real charge)`)
+      setShowDonationModal(false)
+      setCustomAmount('')
+    } catch (err: any) {
+      setError(err.message || 'Failed to process demo donation.')
+    } finally {
+      setDonating(false)
     }
   }
 
@@ -62,7 +174,7 @@ export default function Subscription() {
           </p>
 
           {error && <div className="mb-6 p-4 text-sm bg-destructive/10 text-destructive rounded">{error}</div>}
-          {success && <div className="mb-6 p-4 text-sm bg-primary/10 text-primary rounded">{success}</div>}
+          {success && <div className="mb-6 p-4 text-sm bg-primary/10 text-primary rounded font-medium">{success}</div>}
 
           {/* Toggle */}
           <div className="flex items-center justify-center gap-4">
@@ -187,41 +299,264 @@ export default function Subscription() {
           </Card>
         </section>
 
+        {/* Independent Donation Option */}
         <section className="px-4 max-w-3xl mx-auto mb-32 text-center">
           <h2 className="text-2xl font-serif text-foreground mb-4">Independent Donation Option</h2>
           <p className="text-foreground/70 text-sm mb-6 max-w-xl mx-auto">
             Not ready to subscribe? You can still make a difference. 100% of independent donations go directly to the verified charity pool without participating in the monthly draw.
           </p>
-          <Button onClick={() => setError('Direct donation checkout is currently unavailable until payment processing is configured.')} variant="outline" className="h-10 text-sm font-medium rounded-md border-primary text-primary hover:bg-primary/5">
+          <Button 
+            onClick={() => {
+              if (!user) {
+                navigate('/login?redirect=subscription')
+                return
+              }
+              setShowDonationModal(true)
+            }} 
+            variant="outline" 
+            className="h-10 text-sm font-medium rounded-md border-primary text-primary hover:bg-primary/5"
+          >
             Make a Direct Donation
           </Button>
         </section>
 
-        <section className="px-4 max-w-3xl mx-auto">
+        {/* FAQs Accordion */}
+        <section className="px-4 max-w-3xl mx-auto mb-24">
           <h2 className="text-3xl font-serif text-center text-foreground mb-12">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            <Card className="shadow-sm border-foreground/5">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4 cursor-pointer">
-                  <h3 className="font-bold text-sm text-foreground">How is the 10% charity donation verified?</h3>
-                  <span className="text-foreground/40 text-xl">-</span>
-                </div>
-                <p className="text-sm text-foreground/60 leading-relaxed">
-                  Every contribution is handled via our licensed integration partner and directly sent to registered charity escrow accounts. Statements are updated in real-time.
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-sm border-foreground/5">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center cursor-pointer">
-                  <h3 className="font-bold text-sm text-foreground">What score formats do you support?</h3>
-                  <span className="text-foreground/40 text-xl">+</span>
-                </div>
-              </CardContent>
-            </Card>
+            {faqs.map((faq, index) => {
+              const isOpen = openFaq === index
+              return (
+                <Card 
+                  key={index}
+                  className={`shadow-sm border-foreground/5 overflow-hidden transition-all duration-200 cursor-pointer ${
+                    isOpen ? 'border-primary/20 bg-background ring-1 ring-primary/10' : 'hover:border-foreground/20'
+                  }`}
+                  onClick={() => toggleFaq(index)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-center gap-4">
+                      <h3 className="font-bold text-sm text-foreground select-none">
+                        {faq.question}
+                      </h3>
+                      <span className="text-foreground/50 text-xl font-mono select-none w-6 h-6 flex items-center justify-center shrink-0">
+                        {isOpen ? '−' : '+'}
+                      </span>
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: 'easeInOut' }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-sm text-foreground/70 leading-relaxed pt-4 border-t border-foreground/5 mt-4">
+                            {faq.answer}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </section>
+
       </main>
+
+      {/* Demo Checkout Modal */}
+      <AnimatePresence>
+        {demoCheckoutTier && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-background border border-foreground/10 rounded-xl shadow-2xl max-w-md w-full p-6 sm:p-8"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 text-amber-600 text-xs font-bold uppercase tracking-wider">
+                  <span>⚙️</span> Demo Mode
+                </div>
+                <button 
+                  onClick={() => setDemoCheckoutTier(null)}
+                  className="text-foreground/40 hover:text-foreground text-sm font-bold p-1"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <h3 className="text-2xl font-serif text-foreground mb-2">
+                Demo Checkout — No real charge
+              </h3>
+
+              <p className="text-xs text-foreground/70 mb-6 leading-relaxed">
+                Stripe live payments are currently unavailable in this environment (Stripe India onboarding restrictions). You can activate a demo subscription to test the full subscriber workflow (dashboard, score submission, draws, and verification).
+              </p>
+
+              <div className="bg-foreground/5 rounded-lg p-4 mb-6 border border-foreground/10 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-foreground/60">Selected Plan</span>
+                  <span className="font-bold text-foreground">
+                    {demoCheckoutTier === 'yearly' ? 'Annual Hero' : 'Monthly Supporter'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-foreground/60">Simulated Price</span>
+                  <span className="font-serif font-bold text-primary">
+                    {demoCheckoutTier === 'yearly' ? '£99.99/year' : '£9.99/month'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-foreground/60">Charity Allocation</span>
+                  <span className="font-bold text-accent">10% Included</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-foreground/50 pt-1 border-t border-foreground/5">
+                  <span>Charge Amount:</span>
+                  <span className="font-semibold text-emerald-600">£0.00 (Demo Mode)</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button 
+                  disabled={demoActivating}
+                  onClick={handleConfirmDemoSubscription}
+                  className="w-full h-11 bg-primary text-white hover:bg-primary/90 font-medium"
+                >
+                  {demoActivating ? 'Activating Demo Access...' : 'Activate Demo Subscription'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setDemoCheckoutTier(null)}
+                  className="w-full h-10 border-foreground/10 text-foreground/70 text-xs"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Demo Direct Donation Modal */}
+      <AnimatePresence>
+        {showDonationModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-background border border-foreground/10 rounded-xl shadow-2xl max-w-md w-full p-6 sm:p-8"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-500/10 text-amber-600 text-xs font-bold uppercase tracking-wider">
+                  <span>⚙️</span> Demo Mode
+                </div>
+                <button 
+                  onClick={() => setShowDonationModal(false)}
+                  className="text-foreground/40 hover:text-foreground text-sm font-bold p-1"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <h3 className="text-2xl font-serif text-foreground mb-2">
+                Demo Donation — No real charge
+              </h3>
+
+              <p className="text-xs text-foreground/70 mb-6 leading-relaxed">
+                Direct donations go 100% to verified partner causes without entering the draw. This is a simulated demo transaction for assignment testing.
+              </p>
+
+              <form onSubmit={handleConfirmDemoDonation} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Select Charity Cause</label>
+                  <select 
+                    value={selectedCharityId} 
+                    onChange={e => setSelectedCharityId(e.target.value)}
+                    className="w-full h-10 px-3 rounded-md bg-white border border-foreground/10 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                    required
+                  >
+                    {charities.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Select Donation Amount</label>
+                  <div className="grid grid-cols-4 gap-2 mb-2">
+                    {[10, 25, 50, 100].map(amt => (
+                      <button
+                        type="button"
+                        key={amt}
+                        onClick={() => {
+                          setDonationAmount(amt)
+                          setCustomAmount('')
+                        }}
+                        className={`py-2 rounded border text-xs font-bold transition-colors ${
+                          donationAmount === amt && !customAmount
+                            ? 'bg-primary text-white border-primary'
+                            : 'border-foreground/10 hover:bg-foreground/5 text-foreground'
+                        }`}
+                      >
+                        £{amt}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-xs text-foreground/40">£</span>
+                    <Input 
+                      type="number"
+                      placeholder="Other custom amount (GBP)"
+                      value={customAmount}
+                      onChange={e => setCustomAmount(e.target.value)}
+                      className="pl-7 text-xs"
+                      min="1"
+                      step="1"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-foreground/5 p-3 rounded text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-foreground/60">Simulated Donation:</span>
+                    <span className="font-bold text-primary">
+                      £{formatGBP(customAmount ? parseFloat(customAmount) || 0 : donationAmount)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-emerald-600">
+                    <span>Charge to Card:</span>
+                    <span className="font-bold">£0.00 (Demo Mode)</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <Button 
+                    type="submit"
+                    disabled={donating}
+                    className="w-full bg-primary text-white hover:bg-primary/90 text-xs h-10"
+                  >
+                    {donating ? 'Recording Demo Donation...' : 'Confirm Demo Donation'}
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setShowDonationModal(false)}
+                    className="w-full text-xs h-9 border-foreground/10"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   )

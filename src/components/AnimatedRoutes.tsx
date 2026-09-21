@@ -8,6 +8,7 @@ import Login from '../pages/Login'
 import Signup from '../pages/Signup'
 import Subscription from '../pages/Subscription'
 import Charities from '../pages/Charities'
+import CharityDetail from '../pages/CharityDetail'
 import Dashboard from '../pages/Dashboard'
 import Scores from '../pages/Scores'
 import Draws from '../pages/Draws'
@@ -71,7 +72,9 @@ export function AnimatedRoutes() {
           <Route path="login" element={<Login />} />
           <Route path="signup" element={<Signup />} />
           <Route path="subscribe" element={<Subscription />} />
+          <Route path="subscription" element={<Subscription />} />
           <Route path="charities" element={<Charities />} />
+          <Route path="charities/:id" element={<CharityDetail />} />
           <Route path="dashboard" element={
             <ProtectedRoute requiredRole="user">
               <Dashboard />
@@ -82,21 +85,9 @@ export function AnimatedRoutes() {
               <Scores />
             </ProtectedRoute>
           } />
-          <Route path="draws" element={
-            <ProtectedRoute requiredRole="user">
-              <Draws />
-            </ProtectedRoute>
-          } />
-          <Route path="winner-verification" element={
-            <ProtectedRoute requiredRole="user">
-              <WinnerVerification />
-            </ProtectedRoute>
-          } />
-          <Route path="admin" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="draws" element={<Draws />} />
+          <Route path="winner-verification" element={<WinnerVerification />} />
+          <Route path="admin" element={<AdminDashboard />} />
         </Route>
       </Routes>
     </AnimatePresence>

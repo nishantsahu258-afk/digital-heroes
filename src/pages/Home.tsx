@@ -75,6 +75,15 @@ export default function Home() {
     }
   }
 
+  const handleSupportCause = () => {
+    const charityId = featuredCharity?.id
+    if (user) {
+      navigate(charityId ? `/subscribe?charity=${charityId}` : '/subscribe')
+    } else {
+      navigate(charityId ? `/signup?charity=${charityId}` : '/signup')
+    }
+  }
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -221,9 +230,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <Button onClick={handleScoreSubmitClick} className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
-                Submit Scorecard to Enter
-              </Button>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button onClick={handleScoreSubmitClick} className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
+                  Submit Scorecard to Enter
+                </Button>
+                <Button asChild variant="outline" className="rounded-full px-6 bg-white border-foreground/10 text-foreground hover:bg-foreground/5">
+                  <Link to="/draws">View Draw Results</Link>
+                </Button>
+              </div>
             </div>
 
             <Card className="border-foreground/5 shadow-xl shadow-black/5 p-8">
@@ -332,9 +346,9 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                  <Button asChild className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
-                    <Link to="/subscribe">Support This Cause</Link>
+                <div className="flex flex-wrap items-center gap-6">
+                  <Button onClick={handleSupportCause} className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
+                    Support This Cause
                   </Button>
                   <Link to="/charities" className="text-sm font-medium text-foreground hover:text-primary underline underline-offset-4">View Charity Directory</Link>
                 </div>

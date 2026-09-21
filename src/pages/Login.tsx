@@ -63,8 +63,13 @@ export default function Login() {
         .eq('id', data.user.id)
         .single()
         
+      const params = new URLSearchParams(window.location.search)
+      const redirectParam = params.get('redirect')
+
       if (profile?.role === 'admin') {
         navigate('/admin')
+      } else if (redirectParam) {
+        navigate(redirectParam.startsWith('/') ? redirectParam : `/${redirectParam}`)
       } else {
         navigate('/dashboard')
       }

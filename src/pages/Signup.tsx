@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,9 @@ import type { Charity } from '@/types'
 
 export default function Signup() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const charityFromUrl = searchParams.get('charity')
+
   const { user, profile, isLoading } = useAuth()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -34,7 +37,9 @@ export default function Signup() {
       try {
         const data = await charityService.getCharities()
         setCharitiesList(data)
-        if (data.length > 0) {
+        if (charityFromUrl && data.some(c => c.id === charityFromUrl)) {
+          setCharity(charityFromUrl)
+        } else if (data.length > 0) {
           setCharity(data[0].id)
         }
       } catch (err) {
@@ -42,7 +47,7 @@ export default function Signup() {
       }
     }
     fetchCharities()
-  }, [])
+  }, [charityFromUrl])
 
   useEffect(() => {
     if (!isLoading && user && profile) {
@@ -82,7 +87,13 @@ export default function Signup() {
     }
 
     if (authData.user) {
-      navigate('/dashboard')
+      const params = new URLSearchParams(window.location.search)
+      const redirectParam = params.get('redirect')
+      if (redirectParam) {
+        navigate(redirectParam.startsWith('/') ? redirectParam : `/${redirectParam}`)
+      } else {
+        navigate('/dashboard')
+      }
     }
   }
 

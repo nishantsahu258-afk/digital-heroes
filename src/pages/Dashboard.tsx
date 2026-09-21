@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '@/layouts/Navbar'
 import { Footer } from '@/layouts/Footer'
@@ -51,6 +51,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 p-8 text-center text-foreground/60">Loading your dashboard...</main>
+      <Footer />
     </div>
   )
 
@@ -58,6 +59,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 p-8 text-center text-destructive">Error: {error}</main>
+      <Footer />
     </div>
   )
 
@@ -86,9 +88,12 @@ export default function Dashboard() {
                 Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Unknown'}
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button asChild className="bg-primary text-white hover:bg-primary/90 rounded-md">
                 <Link to="/scores">Add Score</Link>
+              </Button>
+              <Button variant="outline" asChild className="border-foreground/10 text-foreground rounded-md">
+                <Link to="/winner-verification">Winner Verification</Link>
               </Button>
               <Button variant="outline" asChild className="border-foreground/10 text-foreground rounded-md">
                 <Link to="/charities">Change Charity</Link>
@@ -96,6 +101,25 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
+
+        {winnings.length > 0 && (
+          <section className="px-8 max-w-6xl mx-auto mb-6">
+            <div className="p-4 sm:p-6 rounded-lg bg-accent/10 border border-accent/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-base">🏆</span>
+                  <h2 className="text-base sm:text-lg font-bold text-foreground">You Have a Prize Claim Awaiting Verification!</h2>
+                </div>
+                <p className="text-xs sm:text-sm text-foreground/70">
+                  Upload your golf scorecard screenshot to verify your entry and receive your prize payout.
+                </p>
+              </div>
+              <Button asChild className="bg-primary text-white hover:bg-primary/90 rounded-md shrink-0">
+                <Link to="/winner-verification">Verify & Claim Prize →</Link>
+              </Button>
+            </div>
+          </section>
+        )}
 
         <section className="px-8 max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-1 shadow-sm border-foreground/5">
@@ -118,12 +142,15 @@ export default function Dashboard() {
                   <div className="text-xl font-serif text-foreground">{isVerified ? scores.length : 0} / 5 slots</div>
                 </div>
               </div>
-              <div className="bg-foreground/5 rounded-md p-3 text-sm text-foreground/70 flex items-center gap-3">
+              <div className="bg-foreground/5 rounded-md p-3 text-sm text-foreground/70 flex items-center gap-3 mb-4">
                 <div className="w-6 h-6 shrink-0 bg-white rounded flex items-center justify-center border border-foreground/10 text-foreground/40 text-xs">✓</div>
                 {isVerified
                   ? (scores.length >= 5 ? 'Your 5 numbers are ready for the draw.' : `Submit ${5 - scores.length} more scores to enter.`)
                   : 'Subscribe to enter the monthly draws.'}
               </div>
+              <Link to="/draws" className="text-xs font-bold text-primary hover:underline block text-center">
+                View Draw Results & Rules →
+              </Link>
             </CardContent>
           </Card>
 
@@ -173,7 +200,7 @@ export default function Dashboard() {
                 <div className="text-center py-4">
                   <div className="text-sm text-foreground/60 mb-4">You are not currently subscribed.</div>
                   <Button asChild className="w-full bg-primary text-white">
-                    <Link to="/subscription">View Plans</Link>
+                    <Link to="/subscribe">View Plans</Link>
                   </Button>
                 </div>
               )}
@@ -202,8 +229,13 @@ export default function Dashboard() {
 
         <section className="px-8 max-w-6xl mx-auto mt-6">
           <Card className="shadow-sm border-foreground/5">
-            <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
+            <CardHeader className="pb-6 border-b border-foreground/5 mb-6 flex flex-row items-center justify-between">
               <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
+              {winnings.length > 0 && (
+                <Button asChild variant="outline" size="sm" className="text-xs">
+                  <Link to="/winner-verification">Verification Portal →</Link>
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               {winnings.length === 0 ? (
@@ -218,17 +250,31 @@ export default function Dashboard() {
                         <div className="font-bold text-foreground">Matched {win.match_count} Numbers</div>
                         <div className="text-sm text-foreground/60">Draw: {new Date(win.draws?.period_end).toLocaleDateString()}</div>
                       </div>
-                      <div className="flex items-center gap-6">
+                      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                         <div className="text-right">
                           <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
                           <div className="font-serif text-lg text-primary">£{win.prize_amount?.toFixed(2)}</div>
                         </div>
                         <div className="text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
-                          <div className={`text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent-foreground'}`}>
-                            {win.payment_status}
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Verification</div>
+                          <div className={`text-xs font-bold uppercase px-2 py-1 rounded ${
+                            win.verification_status === 'approved' ? 'bg-primary/10 text-primary' : 
+                            win.verification_status === 'rejected' ? 'bg-destructive/10 text-destructive' : 'bg-accent/10 text-accent-foreground'
+                          }`}>
+                            {win.verification_status || 'Pending'}
                           </div>
                         </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Payout</div>
+                          <div className={`text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-foreground/10 text-foreground/70'}`}>
+                            {win.payment_status || 'Pending'}
+                          </div>
+                        </div>
+                        <Button asChild size="sm" variant="default" className="text-xs bg-primary text-white hover:bg-primary/90">
+                          <Link to="/winner-verification">
+                            {win.verification_status === 'approved' ? 'View Claim' : 'Upload Proof'}
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   ))}
