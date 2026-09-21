@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import { CountUp } from '@/components/ui/CountUp'
 
 export default function AdminDashboard() {
   const { profile, signOut } = useAuth()
+  const navigate = useNavigate()
   
   const [stats, setStats] = useState({
     users: 0,
@@ -74,6 +75,11 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
+
   if (profile?.role !== 'admin') {
     return <div className="p-8 text-center">Unauthorized. Admin access required.</div>
   }
@@ -111,7 +117,7 @@ export default function AdminDashboard() {
         <div className="mt-auto p-6 border-t border-white/10">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium">Admin User</div>
-            <button onClick={signOut} className="text-xs text-white/50 hover:text-white">Sign Out</button>
+            <button onClick={handleSignOut} className="text-xs text-white/50 hover:text-white transition-colors cursor-pointer">Sign Out</button>
           </div>
         </div>
       </aside>
