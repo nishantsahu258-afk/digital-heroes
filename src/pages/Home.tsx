@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Navbar } from "@/layouts/Navbar"
 import { Footer } from "@/layouts/Footer"
 import { Button } from "@/components/ui/button"
@@ -9,13 +9,22 @@ import { charityService } from "@/services/charityService"
 import { drawService } from "@/services/drawService"
 import { CountUp } from "@/components/ui/CountUp"
 import { Countdown } from "@/components/ui/Countdown"
+import { useAuth } from "@/contexts/AuthContext"
+import { formatGBP } from "@/lib/utils"
 
 export default function Home() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  
   const [totalRaised, setTotalRaised] = useState<number>(0)
   const [totalPrizePool, setTotalPrizePool] = useState<number>(0)
   const [currentEntries, setCurrentEntries] = useState<number>(0)
   const [targetDate, setTargetDate] = useState<string | undefined>()
   const [featuredCharity, setFeaturedCharity] = useState<any>(null)
+  const [drawMonth, setDrawMonth] = useState<string>("Next")
+  const [match5, setMatch5] = useState<number>(2000)
+  const [match4, setMatch4] = useState<number>(1750)
+  const [match3, setMatch3] = useState<number>(1250)
 
   useEffect(() => {
     async function loadData() {
@@ -27,24 +36,42 @@ export default function Home() {
 
         const draws = await drawService.getDraws()
         const upcoming = draws.find(d => d.status === 'draft')
+        let pool = 5000
         if (upcoming) {
-          setTotalPrizePool(upcoming.total_pool || 5000)
+          pool = upcoming.total_pool || 5000
           setTargetDate(upcoming.period_end)
-        } else {
-          setTotalPrizePool(5000)
+          const end = new Date(upcoming.period_end)
+          if (!isNaN(end.getTime())) {
+            setDrawMonth(end.toLocaleString('default', { month: 'long' }))
+          }
         }
         
-        // Mock entries count based on pool, since we don't have a direct endpoint for total unique entries
-        setCurrentEntries(Math.floor((upcoming?.total_pool || 5000) / 10) + 1482)
+        setTotalPrizePool(pool)
+        setMatch5(pool * 0.40)
+        setMatch4(pool * 0.35)
+        setMatch3(pool * 0.25)
+        
+        setCurrentEntries(Math.floor(pool / 10) + 1482)
       } catch (err) {
         console.error("Failed to load totals", err)
         setTotalRaised(127450)
         setTotalPrizePool(5000)
+        setMatch5(2000)
+        setMatch4(1750)
+        setMatch3(1250)
         setCurrentEntries(1482)
       }
     }
     loadData()
   }, [])
+
+  const handleScoreSubmitClick = () => {
+    if (user) {
+      navigate('/scores')
+    } else {
+      navigate('/login?redirect=scores')
+    }
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -170,7 +197,7 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
               <div className="inline-flex items-center rounded-full bg-accent/20 text-accent-foreground px-4 py-1.5 text-xs font-bold uppercase tracking-widest mb-6">
-                March Premium Draw
+                {drawMonth} Premium Draw
               </div>
               <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-6">Our Next Premium Draw is Live</h2>
               <p className="text-foreground/70 mb-10 leading-relaxed">
@@ -192,7 +219,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <Button className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
+              <Button onClick={handleScoreSubmitClick} className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
                 Submit Scorecard to Enter
               </Button>
             </div>
@@ -226,29 +253,29 @@ export default function Home() {
               <Card className="border-0 shadow-sm transition-all duration-200 ease-out hover:-translate-y-[2px] hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="text-sm text-foreground/60 mb-2">Match 5 (Jackpot)</div>
-                  <div className="text-3xl font-serif text-accent mb-4">£2,500</div>
+                  <div className="text-3xl font-serif text-accent mb-4">{formatGBP(match5)}</div>
                   <div className="inline-flex text-[10px] font-bold uppercase bg-accent/10 text-accent-foreground px-2 py-1 rounded">40% of Pool</div>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm transition-all duration-200 ease-out hover:-translate-y-[2px] hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="text-sm text-foreground/60 mb-2">Match 4</div>
-                  <div className="text-3xl font-serif text-foreground mb-4">£1,500</div>
+                  <div className="text-3xl font-serif text-foreground mb-4">{formatGBP(match4)}</div>
                   <div className="inline-flex text-[10px] font-bold uppercase bg-foreground/5 text-foreground/60 px-2 py-1 rounded">35% of Pool</div>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm transition-all duration-200 ease-out hover:-translate-y-[2px] hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="text-sm text-foreground/60 mb-2">Match 3</div>
-                  <div className="text-3xl font-serif text-foreground mb-4">£500</div>
+                  <div className="text-3xl font-serif text-foreground mb-4">{formatGBP(match3)}</div>
                   <div className="inline-flex text-[10px] font-bold uppercase bg-foreground/5 text-foreground/60 px-2 py-1 rounded">25% of Pool</div>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm transition-all duration-200 ease-out hover:-translate-y-[2px] hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="text-sm text-foreground/60 mb-2">Charity Pot</div>
-                  <div className="text-3xl font-serif text-accent/80 mb-4">£500</div>
-                  <div className="inline-flex text-[10px] font-bold uppercase bg-accent/10 text-accent-foreground px-2 py-1 rounded">Guaranteed Donation</div>
+                  <div className="text-3xl font-serif text-accent/80 mb-4">{formatGBP(totalPrizePool * 0.10)}</div>
+                  <div className="inline-flex text-[10px] font-bold uppercase bg-accent/10 text-accent-foreground px-2 py-1 rounded">10% Platform Impact</div>
                 </CardContent>
               </Card>
             </div>
@@ -301,8 +328,8 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-6">
-                  <Button className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
-                    Support This Cause
+                  <Button asChild className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
+                    <Link to="/subscribe">Support This Cause</Link>
                   </Button>
                   <Link to="/charities" className="text-sm font-medium text-foreground hover:text-primary underline underline-offset-4">Read Full Impact Report</Link>
                 </div>
