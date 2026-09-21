@@ -107,21 +107,21 @@ export default function Charities() {
             {causes.map((cause, index) => {
               const category = ['ENVIRONMENT', 'HEALTH', 'EDUCATION', 'COMMUNITY'][index % 4]
               return (
-              <Card key={cause.id} className={`border-foreground/5 shadow-sm overflow-hidden flex flex-col sm:flex-row h-full ${profile?.charity_id === cause.id ? 'ring-2 ring-primary' : ''}`}>
-                <div className="w-full sm:w-2/5 h-48 sm:h-auto bg-foreground/5 shrink-0 flex items-center justify-center overflow-hidden">
+              <Card key={cause.id} className={`border-foreground/10 rounded-2xl shadow-sm overflow-hidden flex flex-col sm:flex-row h-full ${profile?.charity_id === cause.id ? 'ring-2 ring-primary' : ''}`}>
+                <div className="w-full sm:w-1/2 h-48 sm:h-auto bg-foreground/5 shrink-0 flex items-center justify-center overflow-hidden">
                   {cause.image_url ? (
                     <img src={cause.image_url} alt={cause.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]" />
                   ) : (
                     <div className="text-foreground/20 text-4xl transition-transform duration-300 hover:scale-[1.03]">♥</div>
                   )}
                 </div>
-                <CardContent className="p-8 flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">
+                <CardContent className="p-8 flex flex-col flex-1 sm:w-1/2 justify-center">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[9px] font-bold uppercase tracking-widest bg-foreground/5 text-foreground/70 px-3 py-1.5 rounded-full">
                       {category}
                     </span>
-                    <span className="text-xs font-bold text-foreground/60">
-                      Raised: <span className="text-foreground">£{formatGBP(cause.total_raised)}</span>
+                    <span className="text-[11px] font-medium text-foreground/60">
+                      Raised: <span className="font-bold text-foreground">£{formatGBP(cause.total_raised)}</span>
                     </span>
                   </div>
                   <h3 className="text-2xl font-serif text-foreground mb-3">{cause.name}</h3>
@@ -130,15 +130,15 @@ export default function Charities() {
                   </p>
                   
                   {profile && profile.charity_id !== cause.id ? (
-                     <Button onClick={() => handleSelectCharity(cause.id)} variant="outline" className="w-fit text-sm font-medium border-foreground/10 text-foreground">
+                     <Button onClick={() => handleSelectCharity(cause.id)} variant="outline" className="w-fit text-xs font-semibold border-foreground/20 text-foreground">
                        Learn More & Partner
                      </Button>
                   ) : profile && profile.charity_id === cause.id ? (
-                     <Button disabled variant="outline" className="w-fit text-sm font-medium border-primary bg-primary/10 text-primary">
+                     <Button disabled variant="outline" className="w-fit text-xs font-semibold border-primary bg-primary/10 text-primary">
                        Your Current Cause
                      </Button>
                   ) : (
-                     <Button variant="outline" className="w-fit text-sm font-medium border-foreground/10 text-foreground">
+                     <Button variant="outline" className="w-fit text-xs font-semibold border-foreground/20 text-foreground">
                        Learn More & Partner
                      </Button>
                   )}
