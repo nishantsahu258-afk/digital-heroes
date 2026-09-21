@@ -20,23 +20,34 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') as string
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
     
+    if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
+      throw new Error('Missing server configuration')
+    }
+
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('No authorization header')
 
-    // Verify Admin user
+    // Verify Admin user using the user's JWT
     const clientAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     })
-    const { data: { user } } = await clientAuth.auth.getUser()
-    if (!user) throw new Error('Unauthorized')
+    
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await clientAuth.auth.getUser(token)
+    if (userError || !user) throw new Error(`Unauthorized: ${userError?.message}`)
 
+    // Use the user's own client to check their profile (RLS handles this securely)
+    const { data: profile, error: profileError } = await clientAuth.from('profiles').select('role').eq('id', user.id).single()
+    if (profileError || profile?.role !== 'admin') {
+      throw new Error('Requires admin privileges')
+    }
+
+    // Now switch to the privileged client for the actual generation logic
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') throw new Error('Requires admin privileges')
 
     // 1. Get active subscriptions to calculate pools
     // For simplicity, assume all active subs contribute £10 to pool and £1 to charity (configurable in DB)
