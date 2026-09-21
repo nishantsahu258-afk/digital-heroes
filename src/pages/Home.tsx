@@ -340,6 +340,48 @@ export default function Home() {
           </Card>
         </section>
 
+        {/* TESTIMONIALS SECTION */}
+        <section className="py-24 px-6 sm:px-12 xl:px-0 max-w-[1200px] mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4">True Stories</h2>
+            <h3 className="text-4xl md:text-5xl font-serif text-foreground">Our Community Impact</h3>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="border border-border/50 shadow-sm transition-all duration-200 hover:shadow-md">
+              <CardContent className="p-10 lg:p-12">
+                <p className="text-foreground/80 font-serif text-lg leading-relaxed mb-8">
+                  "Logging my scores turned from a standard routine into an exciting event. Winning the gear prize was fantastic, but seeing the donation confirmation felt even better."
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop" alt="Sarah Jenkins" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-foreground">Sarah Jenkins</div>
+                    <div className="text-xs text-foreground/50">Stableford Player (HCP 14)</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border border-border/50 shadow-sm transition-all duration-200 hover:shadow-md">
+              <CardContent className="p-10 lg:p-12">
+                <p className="text-foreground/80 font-serif text-lg leading-relaxed mb-8">
+                  "The constant funding stream from Digital Heroes allowed us to deploy emergency medical supplies without waiting for quarterly grant cycles."
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-secondary">
+                    <img src="https://images.unsplash.com/photo-1537368910025-7028a4ce2df0?w=150&h=150&fit=crop" alt="Dr. Aris Vance" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-foreground">Dr. Aris Vance</div>
+                    <div className="text-xs text-foreground/50">Director, Global Health Alliance</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
       </main>
       
       <Footer />
