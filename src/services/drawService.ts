@@ -55,7 +55,7 @@ export const drawService = {
     return data
   },
 
-  async generateDrawAsAdmin(): Promise<any> {
+  async generateDrawAsAdmin(mode: 'random' | 'algorithmic' = 'random'): Promise<any> {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) throw new Error('Not authenticated')
 
@@ -66,7 +66,8 @@ export const drawService = {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ action: 'simulate', mode })
       }
     )
 
@@ -76,5 +77,23 @@ export const drawService = {
     }
 
     return await response.json()
+  },
+
+  async getUserWinnings(): Promise<any[]> {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data, error } = await supabase
+      .from('winners')
+      .select('*, draws(period_end, mode, winning_numbers)')
+      .eq('profile_id', user.id)
+
+    if (error) throw error
+    // Sort manually by draw period end
+    const sorted = (data || []).sort((a, b) => {
+      if (!a.draws || !b.draws) return 0;
+      return new Date(b.draws.period_end).getTime() - new Date(a.draws.period_end).getTime();
+    });
+    return sorted;
   }
 }

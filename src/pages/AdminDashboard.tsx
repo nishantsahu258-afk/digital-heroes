@@ -21,6 +21,7 @@ export default function AdminDashboard() {
   })
   const [scores, setScores] = useState<any[]>([])
   const [generating, setGenerating] = useState(false)
+  const [drawMode, setDrawMode] = useState<'random' | 'algorithmic'>('random')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
     setGenerating(true)
     setError(null)
     try {
-      await drawService.generateDrawAsAdmin()
+      await drawService.generateDrawAsAdmin(drawMode)
       alert('Draw generated successfully!')
     } catch (err: any) {
       setError(err.message || 'Failed to generate draw')
@@ -126,6 +127,14 @@ export default function AdminDashboard() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
               <Input placeholder="Search users or draws..." className="pl-9 h-10 bg-white border-0 shadow-sm" />
             </div>
+            <select
+              value={drawMode}
+              onChange={(e) => setDrawMode(e.target.value as 'random' | 'algorithmic')}
+              className="h-10 px-3 bg-white border border-foreground/10 rounded-md text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="random">Random Mode</option>
+              <option value="algorithmic">Algorithmic Mode</option>
+            </select>
             <Button 
               disabled={generating} 
               onClick={handleGenerateDraw} 

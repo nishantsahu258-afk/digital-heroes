@@ -14,6 +14,38 @@ function generateUniqueNumbers(count: number, max: number): number[] {
   return Array.from(nums).sort((a, b) => a - b)
 }
 
+function generateWeightedNumbers(count: number, frequencies: Record<number, number>, max: number): number[] {
+  const nums = new Set<number>()
+  
+  // Calculate total weight to start
+  let availableNums = Array.from({ length: max }, (_, i) => i + 1)
+  
+  while (nums.size < count) {
+    let totalWeight = 0
+    const weights: { num: number, weight: number }[] = []
+    
+    for (const num of availableNums) {
+      // Base weight of 1, plus frequency from submitted scores
+      const weight = 1 + (frequencies[num] || 0)
+      totalWeight += weight
+      weights.push({ num, weight })
+    }
+    
+    // Random selection based on total weight
+    let randomVal = Math.random() * totalWeight
+    for (const item of weights) {
+      randomVal -= item.weight
+      if (randomVal <= 0) {
+        nums.add(item.num)
+        availableNums = availableNums.filter(n => n !== item.num)
+        break
+      }
+    }
+  }
+  
+  return Array.from(nums).sort((a, b) => a - b)
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -31,6 +63,15 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('No authorization header')
 
+    // Parse request body for mode
+    let reqBody = {}
+    try {
+      reqBody = await req.json()
+    } catch (e) {
+      // ignore empty body
+    }
+    const mode = reqBody.mode === 'algorithmic' ? 'algorithmic' : 'random'
+
     // Verify Admin user using the user's JWT
     const clientAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
@@ -40,25 +81,21 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await clientAuth.auth.getUser(token)
     if (userError || !user) throw new Error(`Unauthorized: ${userError?.message}`)
 
-    // Use the user's own client to check their profile (RLS handles this securely)
+    // Use the user's own client to check their profile
     const { data: profile, error: profileError } = await clientAuth.from('profiles').select('role').eq('id', user.id).single()
     if (profileError || profile?.role !== 'admin') {
       throw new Error('Requires admin privileges')
     }
 
-    // Now switch to the privileged client for the actual generation logic
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
     // 1. Get active subscriptions to calculate pools
-    // For simplicity, assume all active subs contribute £10 to pool and £1 to charity (configurable in DB)
     const { data: configRows } = await supabaseAdmin.from('system_config').select('*').in('key', ['pool_percent', 'charity_percent', 'monthly_fee', 'yearly_fee'])
     const configs = configRows?.reduce((acc, row) => ({ ...acc, [row.key]: row.value }), {}) || {}
     
     const monthlyFee = configs.monthly_fee || 9.99
     const yearlyFee = configs.yearly_fee || 99.99
     const poolPercent = configs.pool_percent || 0.50
-    // Note: The PRD correction states charity contribution is min 10% of subscription fee.
-    // We calculate the gross revenue and determine allocations from that.
 
     const { data: activeSubs } = await supabaseAdmin.from('subscriptions').select('*').in('status', ['active'])
     let grossRevenue = 0
@@ -71,22 +108,46 @@ serve(async (req) => {
     const tier4Amount = totalPool * 0.35
     const tier3Amount = totalPool * 0.25
 
-    // Get previous draw for jackpot rollover
     const { data: lastDraw } = await supabaseAdmin.from('draws').select('jackpot_rollover').order('created_at', { ascending: false }).limit(1).maybeSingle()
     const actualTier5Amount = tier5Amount + (lastDraw?.jackpot_rollover || 0)
 
-    // 2. Generate Winning Numbers
-    const winningNumbers = generateUniqueNumbers(5, 45)
+    // 2. Find eligible users (Active subs with 5 scores in period)
+    const activeProfileIds = activeSubs?.map(sub => sub.profile_id) || []
+    
+    const { data: allScores } = await supabaseAdmin.from('scores')
+      .select('*')
+      .in('profile_id', activeProfileIds)
+      .order('score_date', { ascending: false })
 
-    // 3. Create Draw Record (Draft)
+    const profileScores: Record<string, number[]> = {}
+    const scoreFrequencies: Record<number, number> = {}
+
+    allScores?.forEach(score => {
+      if (!profileScores[score.profile_id]) profileScores[score.profile_id] = []
+      if (profileScores[score.profile_id].length < 5) {
+        profileScores[score.profile_id].push(score.score_value)
+        // track frequency for algorithmic draw
+        scoreFrequencies[score.score_value] = (scoreFrequencies[score.score_value] || 0) + 1
+      }
+    })
+
+    // 3. Generate Winning Numbers
+    let winningNumbers: number[] = []
+    if (mode === 'algorithmic') {
+      winningNumbers = generateWeightedNumbers(5, scoreFrequencies, 45)
+    } else {
+      winningNumbers = generateUniqueNumbers(5, 45)
+    }
+
+    // 4. Create Draw Record
     const periodStart = new Date()
-    periodStart.setMonth(periodStart.getMonth() - 1) // e.g. for previous month's scores
+    periodStart.setMonth(periodStart.getMonth() - 1)
     
     const { data: draw, error: drawError } = await supabaseAdmin.from('draws').insert({
       period_start: periodStart.toISOString(),
       period_end: new Date().toISOString(),
       status: 'simulated',
-      mode: 'random',
+      mode: mode,
       winning_numbers: winningNumbers,
       total_pool: totalPool,
       tier_5_amount: actualTier5Amount,
@@ -96,24 +157,6 @@ serve(async (req) => {
     }).select().single()
 
     if (drawError) throw drawError
-
-    // 4. Find eligible users (Active subs with 5 scores in period)
-    const activeProfileIds = activeSubs?.map(sub => sub.profile_id) || []
-    
-    // We need to fetch scores for these profiles to see who has 5 scores
-    const { data: allScores } = await supabaseAdmin.from('scores')
-      .select('*')
-      .in('profile_id', activeProfileIds)
-      .order('score_date', { ascending: false })
-
-    // Group by profile and get latest 5
-    const profileScores: Record<string, number[]> = {}
-    allScores?.forEach(score => {
-      if (!profileScores[score.profile_id]) profileScores[score.profile_id] = []
-      if (profileScores[score.profile_id].length < 5) {
-        profileScores[score.profile_id].push(score.score_value)
-      }
-    })
 
     const drawEntries = []
     for (const [profileId, scores] of Object.entries(profileScores)) {
@@ -147,12 +190,11 @@ serve(async (req) => {
           draw_id: draw.id,
           profile_id: entry.profile_id,
           match_count: matchCount,
-          prize_amount: 0, // Calculated next
+          prize_amount: 0,
         })
       }
     }
 
-    // Assign actual prize amounts
     for (const winner of winnersToInsert) {
       if (winner.match_count === 5) winner.prize_amount = actualTier5Amount / tier5Winners
       if (winner.match_count === 4) winner.prize_amount = tier4Amount / tier4Winners
@@ -179,6 +221,7 @@ serve(async (req) => {
       success: true, 
       draw: draw.id,
       winning_numbers: winningNumbers,
+      mode,
       stats: { entries: drawEntries.length, winners: winnersToInsert.length }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '@/layouts/Navbar'
 import { Footer } from '@/layouts/Footer'
@@ -9,6 +9,7 @@ import { scoreService } from '@/services/scoreService'
 import { authService } from '@/services/authService'
 import { charityService } from '@/services/charityService'
 import type { Score, Charity } from '@/types'
+import { drawService } from '@/services/drawService'
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
@@ -18,18 +19,21 @@ export default function Dashboard() {
   const [charity, setCharity] = useState<Charity | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [winnings, setWinnings] = useState<any[]>([])
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [recentScores, sub, charities] = await Promise.all([
+        const [recentScores, sub, charities, userWinnings] = await Promise.all([
           scoreService.getRecentScores(3),
           authService.getSubscription(),
-          charityService.getCharities()
+          charityService.getCharities(),
+          drawService.getUserWinnings()
         ])
         
         setScores(recentScores)
         setSubscription(sub)
+        setWinnings(userWinnings)
         
         if (profile?.charity_id) {
           setCharity(charities.find(c => c.id === profile.charity_id) || null)
@@ -45,14 +49,92 @@ export default function Dashboard() {
     else if (!profile) setLoading(false) // Handle missing profile gracefully
   }, [user, profile])
 
-  if (loading) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center">Loading...</main></div>
-  if (error) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center text-destructive">Error: {error}</main></div>
+  if (loading) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center">Loading...
+        {/* Winnings & Payouts Section */}
+        <section className="px-4 max-w-6xl mx-auto mt-8">
+          <Card className="shadow-sm border-foreground/5">
+            <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
+              <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {winnings.length === 0 ? (
+                <div className="text-center py-12 text-foreground/50">
+                  <p>No winnings yet. Keep submitting your scores and playing!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {winnings.map(win => (
+                    <div key={win.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-foreground/5 rounded-md gap-4 sm:gap-0">
+                      <div>
+                        <div className="font-bold text-foreground">Matched {win.match_count} Numbers</div>
+                        <div className="text-sm text-foreground/60">Draw: {new Date(win.draws?.period_end).toLocaleDateString()}</div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
+                          <div className="font-serif text-lg text-primary">£{win.prize_amount.toFixed(2)}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
+                          <div className={"text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}"}>
+                            {win.payment_status}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+      </main></div>
+  if (error) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center text-destructive">Error: {error}
+        {/* Winnings & Payouts Section */}
+        <section className="px-4 max-w-6xl mx-auto mt-8">
+          <Card className="shadow-sm border-foreground/5">
+            <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
+              <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {winnings.length === 0 ? (
+                <div className="text-center py-12 text-foreground/50">
+                  <p>No winnings yet. Keep submitting your scores and playing!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {winnings.map(win => (
+                    <div key={win.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-foreground/5 rounded-md gap-4 sm:gap-0">
+                      <div>
+                        <div className="font-bold text-foreground">Matched {win.match_count} Numbers</div>
+                        <div className="text-sm text-foreground/60">Draw: {new Date(win.draws?.period_end).toLocaleDateString()}</div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
+                          <div className="font-serif text-lg text-primary">£{win.prize_amount.toFixed(2)}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
+                          <div className={"text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}"}>
+                            {win.payment_status}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+      </main></div>
 
   const isVerified = subscription?.status === 'active'
   const isAnnual = subscription?.tier === 'yearly'
   const planName = isAnnual ? 'Annual Hero' : (subscription ? 'Monthly Hero' : 'Free Tier')
-  const planPrice = isAnnual ? '£99.99/yr' : '£9.99/mo'
-  const directContribution = isAnnual ? '£10.00' : '£1.00'
+  const planPrice = isAnnual ? 'Â£99.99/yr' : 'Â£9.99/mo'
+  const directContribution = isAnnual ? 'Â£10.00' : 'Â£1.00'
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -111,7 +193,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="bg-foreground/5 rounded-md p-3 text-sm text-foreground/70 flex items-center gap-3">
-                <div className="w-6 h-6 shrink-0 bg-white rounded flex items-center justify-center border border-foreground/10 text-foreground/40 text-xs">✓</div>
+                <div className="w-6 h-6 shrink-0 bg-white rounded flex items-center justify-center border border-foreground/10 text-foreground/40 text-xs">âœ“</div>
                 {isVerified 
                   ? (scores.length >= 5 ? 'Your 5 numbers are ready for the draw.' : `Submit ${5 - scores.length} more scores to enter.`)
                   : 'Subscribe to enter the monthly draws.'}
@@ -185,7 +267,7 @@ export default function Dashboard() {
               
               <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Your Direct Contribution</div>
               <div className="text-xl font-serif text-foreground mb-8">
-                {subscription ? directContribution : '£0.00'} <span className="text-sm font-sans text-foreground/50">(From fee)</span>
+                {subscription ? directContribution : 'Â£0.00'} <span className="text-sm font-sans text-foreground/50">(From fee)</span>
               </div>
 
               <div className="border-t border-foreground/5 pt-6">
@@ -196,6 +278,45 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
+        </section>
+      
+        {/* Winnings & Payouts Section */}
+        <section className="px-4 max-w-6xl mx-auto mt-8">
+          <Card className="shadow-sm border-foreground/5">
+            <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
+              <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {winnings.length === 0 ? (
+                <div className="text-center py-12 text-foreground/50">
+                  <p>No winnings yet. Keep submitting your scores and playing!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {winnings.map(win => (
+                    <div key={win.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-foreground/5 rounded-md gap-4 sm:gap-0">
+                      <div>
+                        <div className="font-bold text-foreground">Matched {win.match_count} Numbers</div>
+                        <div className="text-sm text-foreground/60">Draw: {new Date(win.draws?.period_end).toLocaleDateString()}</div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
+                          <div className="font-serif text-lg text-primary">£{win.prize_amount.toFixed(2)}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
+                          <div className={"text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}"}>
+                            {win.payment_status}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </section>
       </main>
 
