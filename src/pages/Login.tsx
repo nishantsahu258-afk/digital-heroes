@@ -14,6 +14,7 @@ export default function Login() {
   const { user, profile, isLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const prefersReducedMotion = useReducedMotion()
@@ -40,7 +41,13 @@ export default function Login() {
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.toLowerCase().includes('invalid login credentials') || error.message.toLowerCase().includes('invalid_credentials')) {
+        setError('Incorrect email or password. Please check your details and try again.')
+      } else if (error.message.toLowerCase().includes('email not confirmed')) {
+        setError('Please verify your email address before logging in. Check your inbox.')
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
       return
     }
@@ -96,17 +103,25 @@ export default function Login() {
                 <motion.div animate={shakeAnimation} transition={{ duration: 0.3 }} className="relative">
                   <Input 
                     id="password" 
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="h-12 pr-10"
                   />
-                  {/* Eye icon placeholder */}
-                  <div className="absolute right-3 top-3 text-foreground/40">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-3 text-foreground/40 hover:text-foreground/70 transition-colors focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                  </button>
                 </motion.div>
               </div>
 
