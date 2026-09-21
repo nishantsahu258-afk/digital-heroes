@@ -111,36 +111,45 @@ export default function Home() {
           initial="hidden"
           animate="visible"
           viewport={{ once: true }}
-          className="relative pt-20 pb-32 px-8 flex flex-col items-center text-center max-w-4xl mx-auto"
+          className="relative pt-20 pb-28 px-6 sm:px-8 flex flex-col items-center text-center max-w-4xl mx-auto"
         >
-          <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary mb-8">
-            An Entirely New Way To Play
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary mb-8 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            Play With Purpose • Feel, Not Fairway
           </motion.div>
           
-          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-serif text-foreground mb-6 leading-tight">
-            Play Golf. Win Prizes.<br/>Change Lives.
+          <motion.h1 variants={itemVariants} className="text-5xl sm:text-6xl md:text-7xl font-serif text-foreground mb-6 leading-[1.15] tracking-tight">
+            Play With Purpose.<br />
+            <span className="italic font-normal text-primary">Change Lives</span> With Every Round.
           </motion.h1>
           
-          <motion.p variants={itemVariants} className="text-lg md:text-xl text-foreground/70 mb-10 max-w-2xl leading-relaxed">
-            Track your performance, enter premium monthly rewards draws, and fund world-changing charity projects with every scorecard logged.
+          <motion.p variants={itemVariants} className="text-lg md:text-xl text-foreground/75 mb-10 max-w-2xl leading-relaxed">
+            Turn your game into measurable social good. Log your scores, enter transparent monthly rewards draws, and fund world-changing charity projects worldwide.
           </motion.p>
           
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-20">
-            <Button asChild size="lg" className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4 mb-16 w-full sm:w-auto">
+            <Button asChild size="lg" className="w-full sm:w-auto rounded-full px-8 h-12 bg-primary text-white hover:bg-primary/90 shadow-md hover:shadow-lg transition-all text-sm font-semibold">
               <Link to="/signup">Join the Movement</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full px-8 bg-white border-foreground/10 text-foreground hover:bg-foreground/5">
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto rounded-full px-8 h-12 bg-white/80 backdrop-blur-sm border-foreground/15 text-foreground hover:bg-foreground/5 text-sm font-semibold">
               <Link to="/#how-it-works">See How It Works</Link>
             </Button>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="w-full max-w-md mx-auto">
-            <Card className="shadow-xl shadow-black/5 border-foreground/5 py-8">
+          <motion.div variants={itemVariants} className="w-full max-w-lg mx-auto">
+            <Card className="shadow-xl shadow-black/5 border-foreground/10 bg-white/90 backdrop-blur-sm py-8 px-6 rounded-3xl">
               <CardContent className="p-0 flex flex-col items-center justify-center">
-                <span className="text-4xl md:text-5xl font-serif text-foreground mb-2">
+                <span className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-2">
                   <CountUp end={totalRaised} prefix="£" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-widest text-foreground/50">Total Funds Raised For Global Causes</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-foreground/50">Total Funds Raised For Verified Causes</span>
+                <div className="flex items-center gap-4 mt-4 pt-4 border-t border-foreground/10 text-[11px] text-foreground/60">
+                  <span className="flex items-center gap-1"><span className="text-primary font-bold">✓</span> 100% Transparent</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1"><span className="text-primary font-bold">✓</span> 10%+ Minimum Giving</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1"><span className="text-primary font-bold">✓</span> Direct Partner Delivery</span>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -399,9 +408,45 @@ export default function Home() {
           </div>
         </section>
 
+        {/* PROMINENT PERSUASIVE BOTTOM CTA */}
+        <section className="py-20 px-6 sm:px-12 max-w-6xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="bg-[#1A2E26] text-white rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-2xl"
+          >
+            {/* Ambient background glow */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#2D5A43]/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#B58D3D]/20 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20"></div>
+
+            <div className="relative z-10 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#E5A83B] mb-6">
+                ★ Feel, Not Fairway ★
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-white mb-6 leading-tight">
+                Ready to Turn Your Passion Into Lasting Purpose?
+              </h2>
+              <p className="text-white/80 text-base md:text-lg mb-10 leading-relaxed max-w-2xl mx-auto">
+                Join thousands of members across the UK who are driving tangible global change every month through transparent rewards and verified charitable giving.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild size="lg" className="w-full sm:w-auto rounded-full px-8 h-12 bg-[#2D5A43] hover:bg-[#234735] text-white shadow-lg text-sm font-semibold border border-white/20">
+                  <Link to="/subscribe">Start Your Subscription</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="w-full sm:w-auto rounded-full px-8 h-12 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 text-sm font-semibold">
+                  <Link to="/charities">Explore Vetted Charities</Link>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
       </main>
       
       <Footer />
     </div>
   )
 }
+
