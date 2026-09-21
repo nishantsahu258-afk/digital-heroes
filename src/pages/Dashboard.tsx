@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Navbar } from '@/layouts/Navbar'
 import { Footer } from '@/layouts/Footer'
@@ -30,11 +30,9 @@ export default function Dashboard() {
           charityService.getCharities(),
           drawService.getUserWinnings()
         ])
-        
         setScores(recentScores)
         setSubscription(sub)
         setWinnings(userWinnings)
-        
         if (profile?.charity_id) {
           setCharity(charities.find(c => c.id === profile.charity_id) || null)
         }
@@ -46,89 +44,22 @@ export default function Dashboard() {
       }
     }
     if (user && profile) loadData()
-    else if (!profile) setLoading(false) // Handle missing profile gracefully
+    else if (!profile) setLoading(false)
   }, [user, profile])
 
-  if (loading) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center">Loading...
-        {/* Winnings & Payouts Section */}
-        <section className="px-4 max-w-6xl mx-auto mt-8">
-          <Card className="shadow-sm border-foreground/5">
-            <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
-              <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {winnings.length === 0 ? (
-                <div className="text-center py-12 text-foreground/50">
-                  <p>No winnings yet. Keep submitting your scores and playing!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {winnings.map(win => (
-                    <div key={win.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-foreground/5 rounded-md gap-4 sm:gap-0">
-                      <div>
-                        <div className="font-bold text-foreground">Matched {win.match_count} Numbers</div>
-                        <div className="text-sm text-foreground/60">Draw: {new Date(win.draws?.period_end).toLocaleDateString()}</div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
-                          <div className="font-serif text-lg text-primary">£{win.prize_amount.toFixed(2)}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
-                          <div className={"text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}"}>
-                            {win.payment_status}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      </main></div>
-  if (error) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center text-destructive">Error: {error}
-        {/* Winnings & Payouts Section */}
-        <section className="px-4 max-w-6xl mx-auto mt-8">
-          <Card className="shadow-sm border-foreground/5">
-            <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
-              <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {winnings.length === 0 ? (
-                <div className="text-center py-12 text-foreground/50">
-                  <p>No winnings yet. Keep submitting your scores and playing!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {winnings.map(win => (
-                    <div key={win.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-foreground/5 rounded-md gap-4 sm:gap-0">
-                      <div>
-                        <div className="font-bold text-foreground">Matched {win.match_count} Numbers</div>
-                        <div className="text-sm text-foreground/60">Draw: {new Date(win.draws?.period_end).toLocaleDateString()}</div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
-                          <div className="font-serif text-lg text-primary">£{win.prize_amount.toFixed(2)}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
-                          <div className={"text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}"}>
-                            {win.payment_status}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      </main></div>
+  if (loading) return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
+      <main className="flex-1 p-8 text-center text-foreground/60">Loading your dashboard...</main>
+    </div>
+  )
+
+  if (error) return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navbar />
+      <main className="flex-1 p-8 text-center text-destructive">Error: {error}</main>
+    </div>
+  )
 
   const isVerified = subscription?.status === 'active'
   const isAnnual = subscription?.tier === 'yearly'
@@ -139,9 +70,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      
       <main className="flex-1 pb-24">
-        {/* Header */}
         <section className="px-8 py-10 max-w-6xl mx-auto border-b border-foreground/5 mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
@@ -168,15 +97,12 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Grid */}
         <section className="px-8 max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Upcoming Draw */}
           <Card className="lg:col-span-1 shadow-sm border-foreground/5">
             <CardHeader className="flex flex-row items-center justify-between pb-6">
               <CardTitle className="text-lg font-serif font-normal">Upcoming Premium Draw</CardTitle>
               {isVerified ? (
-                 <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">Qualified</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">Qualified</span>
               ) : (
                 <span className="text-[10px] font-bold uppercase tracking-widest bg-destructive/10 text-destructive px-2 py-1 rounded">Not Eligible</span>
               )}
@@ -193,15 +119,14 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="bg-foreground/5 rounded-md p-3 text-sm text-foreground/70 flex items-center gap-3">
-                <div className="w-6 h-6 shrink-0 bg-white rounded flex items-center justify-center border border-foreground/10 text-foreground/40 text-xs">âœ“</div>
-                {isVerified 
+                <div className="w-6 h-6 shrink-0 bg-white rounded flex items-center justify-center border border-foreground/10 text-foreground/40 text-xs">✓</div>
+                {isVerified
                   ? (scores.length >= 5 ? 'Your 5 numbers are ready for the draw.' : `Submit ${5 - scores.length} more scores to enter.`)
                   : 'Subscribe to enter the monthly draws.'}
               </div>
             </CardContent>
           </Card>
 
-          {/* Latest Scores */}
           <Card className="lg:col-span-2 shadow-sm border-foreground/5">
             <CardHeader className="flex flex-row items-center justify-between pb-6">
               <CardTitle className="text-lg font-serif font-normal">Latest Stableford Scores</CardTitle>
@@ -224,7 +149,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Subscription */}
           <Card className="shadow-sm border-foreground/5">
             <CardHeader className="pb-6">
               <CardTitle className="text-lg font-serif font-normal">Subscription & Allocation</CardTitle>
@@ -256,7 +180,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Charity Impact */}
           <Card className="shadow-sm border-foreground/5">
             <CardHeader className="pb-6">
               <CardTitle className="text-lg font-serif font-normal">Your Charity Impact</CardTitle>
@@ -264,12 +187,10 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Supported Cause</div>
               <div className="text-xl font-serif text-primary mb-8">{charity?.name || 'Not selected'}</div>
-              
               <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Your Direct Contribution</div>
               <div className="text-xl font-serif text-foreground mb-8">
                 {subscription ? directContribution : '£0.00'} <span className="text-sm font-sans text-foreground/50">(From fee)</span>
               </div>
-
               <div className="border-t border-foreground/5 pt-6">
                 <Link to="/charities" className="text-xs font-bold text-destructive/80 hover:text-destructive hover:underline">
                   Change Allocated Charity Partner
@@ -277,11 +198,9 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-
         </section>
-      
-        {/* Winnings & Payouts Section */}
-        <section className="px-4 max-w-6xl mx-auto mt-8">
+
+        <section className="px-8 max-w-6xl mx-auto mt-6">
           <Card className="shadow-sm border-foreground/5">
             <CardHeader className="pb-6 border-b border-foreground/5 mb-6">
               <CardTitle className="text-xl font-serif">Your Winnings & Payouts</CardTitle>
@@ -302,11 +221,11 @@ export default function Dashboard() {
                       <div className="flex items-center gap-6">
                         <div className="text-right">
                           <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Prize</div>
-                          <div className="font-serif text-lg text-primary">£{win.prize_amount.toFixed(2)}</div>
+                          <div className="font-serif text-lg text-primary">£{win.prize_amount?.toFixed(2)}</div>
                         </div>
                         <div className="text-right">
                           <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 mb-1">Status</div>
-                          <div className={"text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'}"}>
+                          <div className={`text-xs font-bold uppercase px-2 py-1 rounded ${win.payment_status === 'paid' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent-foreground'}`}>
                             {win.payment_status}
                           </div>
                         </div>

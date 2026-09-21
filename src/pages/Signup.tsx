@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Navbar } from '@/layouts/Navbar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { motion, useReducedMotion } from 'framer-motion'
+import { charityService } from '@/services/charityService'
+import type { Charity } from '@/types'
 
 export default function Signup() {
   const navigate = useNavigate()
@@ -17,13 +19,29 @@ export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [handicap, setHandicap] = useState('')
-  const [charity, setCharity] = useState('clean-water')
+  const [charity, setCharity] = useState('')
+  const [charitiesList, setCharitiesList] = useState<Charity[]>([])
   const [plan, setPlan] = useState<'monthly' | 'annual'>('monthly')
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const prefersReducedMotion = useReducedMotion()
   const shakeAnimation = error && !prefersReducedMotion ? { x: [-2, 2, -2, 2, 0] } : {}
+
+  useEffect(() => {
+    async function fetchCharities() {
+      try {
+        const data = await charityService.getCharities()
+        setCharitiesList(data)
+        if (data.length > 0) {
+          setCharity(data[0].id)
+        }
+      } catch (err) {
+        console.error("Failed to load charities", err)
+      }
+    }
+    fetchCharities()
+  }, [])
 
   useEffect(() => {
     if (!isLoading && user && profile) {
@@ -154,9 +172,9 @@ export default function Signup() {
                     <SelectValue placeholder="Select a charity" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="clean-water">Clean Water Initiative</SelectItem>
-                    <SelectItem value="education">Global Education Fund</SelectItem>
-                    <SelectItem value="health">Health First Foundation</SelectItem>
+                    {charitiesList.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
