@@ -12,6 +12,18 @@ export const charityService = {
     return data || []
   },
 
+  async getFeaturedCharity(): Promise<Charity | null> {
+    const { data, error } = await supabase
+      .from('charities')
+      .select('*')
+      .eq('is_featured', true)
+      .limit(1)
+      .maybeSingle()
+
+    if (error) throw error
+    return data
+  },
+
   async updateProfileCharity(charityId: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Not authenticated')

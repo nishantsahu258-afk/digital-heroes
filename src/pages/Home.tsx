@@ -18,7 +18,6 @@ export default function Home() {
   
   const [totalRaised, setTotalRaised] = useState<number>(0)
   const [totalPrizePool, setTotalPrizePool] = useState<number>(0)
-  const [currentEntries, setCurrentEntries] = useState<number>(0)
   const [targetDate, setTargetDate] = useState<string | undefined>()
   const [featuredCharity, setFeaturedCharity] = useState<any>(null)
   const [drawMonth, setDrawMonth] = useState<string>("Next")
@@ -30,7 +29,13 @@ export default function Home() {
     async function loadData() {
       try {
         const charities = await charityService.getCharities()
-        if (charities.length > 0) setFeaturedCharity(charities[0])
+        const featured = await charityService.getFeaturedCharity()
+        if (featured) {
+          setFeaturedCharity(featured)
+        } else if (charities.length > 0) {
+          setFeaturedCharity(charities[0])
+        }
+        
         const total = charities.reduce((acc, c) => acc + (c.total_raised || 0), 0)
         setTotalRaised(total > 0 ? total : 127450) // fallback to demo value if 0
 
@@ -50,8 +55,6 @@ export default function Home() {
         setMatch5(pool * 0.40)
         setMatch4(pool * 0.35)
         setMatch3(pool * 0.25)
-        
-        setCurrentEntries(Math.floor(pool / 10) + 1482)
       } catch (err) {
         console.error("Failed to load totals", err)
         setTotalRaised(127450)
@@ -59,7 +62,6 @@ export default function Home() {
         setMatch5(2000)
         setMatch4(1750)
         setMatch3(1250)
-        setCurrentEntries(1482)
       }
     }
     loadData()
@@ -212,9 +214,9 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-foreground/50 mb-2">Current Entries</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-foreground/50 mb-2">Draw Status</div>
                   <div className="text-3xl font-serif text-foreground">
-                    <CountUp end={currentEntries} />
+                    Accepting Entries
                   </div>
                 </div>
               </div>
@@ -274,8 +276,8 @@ export default function Home() {
               <Card className="border-0 shadow-sm transition-all duration-200 ease-out hover:-translate-y-[2px] hover:shadow-lg">
                 <CardContent className="p-6">
                   <div className="text-sm text-foreground/60 mb-2">Charity Pot</div>
-                  <div className="text-3xl font-serif text-accent/80 mb-4">{formatGBP(totalPrizePool * 0.10)}</div>
-                  <div className="inline-flex text-[10px] font-bold uppercase bg-accent/10 text-accent-foreground px-2 py-1 rounded">10% Platform Impact</div>
+                  <div className="text-3xl font-serif text-accent/80 mb-4">10%+</div>
+                  <div className="inline-flex text-[10px] font-bold uppercase bg-accent/10 text-accent-foreground px-2 py-1 rounded">Of Every Subscription</div>
                 </CardContent>
               </Card>
             </div>
@@ -331,7 +333,7 @@ export default function Home() {
                   <Button asChild className="rounded-full px-8 bg-primary text-white hover:bg-primary/90">
                     <Link to="/subscribe">Support This Cause</Link>
                   </Button>
-                  <Link to="/charities" className="text-sm font-medium text-foreground hover:text-primary underline underline-offset-4">Read Full Impact Report</Link>
+                  <Link to="/charities" className="text-sm font-medium text-foreground hover:text-primary underline underline-offset-4">View Charity Directory</Link>
                 </div>
               </div>
             </div>
