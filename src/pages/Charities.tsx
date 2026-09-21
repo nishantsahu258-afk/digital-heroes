@@ -112,9 +112,9 @@ export default function Charities() {
                   <img
                     src={cause.image_url || [
                       "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&q=80", // Environment/Water
-                      "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80", // Health/Medical
+                      "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=600&h=400&fit=crop&q=80", // Golf/Youth Sport
                       "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=400&fit=crop&q=80", // Education/Books
-                      "https://images.unsplash.com/photo-1587174486073-ae5e1c47f123?w=600&h=400&fit=crop&q=80"  // Community/Golf
+                      "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80"  // Community/Health
                     ][index % 4]}
                     alt={cause.name}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]"
