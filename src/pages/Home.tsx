@@ -295,12 +295,15 @@ export default function Home() {
 
           <Card className="border-foreground/5 shadow-xl shadow-black/5 overflow-hidden">
             <div className="grid md:grid-cols-2">
-              <div className="h-64 md:h-auto bg-foreground/5 w-full object-cover transition-transform duration-300 hover:scale-[1.03] overflow-hidden">
-                {featuredCharity && featuredCharity.image_url ? (
-                  <img src={featuredCharity.image_url} alt="Featured Charity" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-foreground/20 text-6xl">♥</div>
-                )}
+              <div className="h-64 md:h-auto overflow-hidden">
+                <img
+                  src={
+                    featuredCharity?.image_url ||
+                    "https://images.unsplash.com/photo-1541802645635-11f2286a7482?w=800&h=600&fit=crop&q=80"
+                  }
+                  alt={featuredCharity?.name || "Featured Charity"}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.04]"
+                />
               </div>
               <div className="p-10 lg:p-16 flex flex-col justify-center">
                 <div className="flex gap-3 mb-6">
