@@ -111,12 +111,21 @@ export default function Charities() {
                 <div className="w-full sm:w-1/2 h-48 sm:h-auto bg-foreground/5 shrink-0 flex items-center justify-center overflow-hidden">
                   <img
                     src={cause.image_url || [
-                      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&q=80", // Environment/Water
-                      "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=600&h=400&fit=crop&q=80", // Golf/Youth Sport
-                      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=400&fit=crop&q=80", // Education/Books
-                      "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80"  // Community/Health
+                      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&q=80",
+                      "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=600&h=400&fit=crop&q=80",
+                      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=400&fit=crop&q=80",
+                      "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80"
                     ][index % 4]}
                     alt={cause.name}
+                    onError={(e) => {
+                      const fallbacks = [
+                        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop&q=80",
+                        "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=600&h=400&fit=crop&q=80",
+                        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=400&fit=crop&q=80",
+                        "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop&q=80"
+                      ];
+                      (e.target as HTMLImageElement).src = fallbacks[index % 4];
+                    }}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]"
                   />
                 </div>
