@@ -40,16 +40,20 @@ export default function Login() {
       password,
     })
 
+
     if (error) {
-      if (error.message.toLowerCase().includes('invalid login credentials') || error.message.toLowerCase().includes('invalid_credentials')) {
-        setError('Incorrect email or password. Please check your details and try again.')
-      } else if (error.message.toLowerCase().includes('email not confirmed')) {
-        setError('Please verify your email address before logging in. Check your inbox.')
+      const code = (error as any).code || ''
+      const msg = error.message.toLowerCase()
+      if (code === 'email_not_confirmed' || msg.includes('email not confirmed')) {
+        setError('Your email address is not verified. Please check your inbox (and spam folder) for a confirmation link.')
+      } else if (code === 'invalid_credentials' || msg.includes('invalid login credentials') || msg.includes('invalid_credentials')) {
+        setError('Incorrect email or password. If you just signed up, please check your inbox to confirm your email first.')
       } else {
         setError(error.message)
       }
       setLoading(false)
       return
+
     }
 
     if (data.user) {
