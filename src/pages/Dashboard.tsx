@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [subscription, setSubscription] = useState<any>(null)
   const [charity, setCharity] = useState<Charity | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -33,16 +34,19 @@ export default function Dashboard() {
         if (profile?.charity_id) {
           setCharity(charities.find(c => c.id === profile.charity_id) || null)
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err)
+        setError(err.message || 'Failed to load dashboard data')
       } finally {
         setLoading(false)
       }
     }
     if (user && profile) loadData()
+    else if (!profile) setLoading(false) // Handle missing profile gracefully
   }, [user, profile])
 
   if (loading) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center">Loading...</main></div>
+  if (error) return <div className="min-h-screen bg-background flex flex-col"><Navbar /><main className="flex-1 p-8 text-center text-destructive">Error: {error}</main></div>
 
   const isVerified = subscription?.status === 'active'
   const isAnnual = subscription?.tier === 'yearly'
@@ -68,7 +72,7 @@ export default function Dashboard() {
                 )}
               </div>
               <p className="text-foreground/60 text-sm">
-                Member since {new Date(profile?.created_at || '').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Unknown'}
               </p>
             </div>
             <div className="flex gap-3">
@@ -128,7 +132,7 @@ export default function Dashboard() {
                 ) : (
                   scores.map((score) => (
                     <div key={score.id} className="flex items-center justify-between py-3 border-b border-foreground/5 last:border-0">
-                      <span className="text-sm text-foreground/70">{new Date(score.score_date).toLocaleDateString()}</span>
+                      <span className="text-sm text-foreground/70">{score.score_date ? new Date(score.score_date).toLocaleDateString() : 'N/A'}</span>
                       <span className="font-bold text-foreground">{score.score_value} pts</span>
                       <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">Verified</span>
                     </div>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,12 +11,23 @@ import { motion, useReducedMotion } from 'framer-motion'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { user, profile, isLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const prefersReducedMotion = useReducedMotion()
   const shakeAnimation = error && !prefersReducedMotion ? { x: [-2, 2, -2, 2, 0] } : {}
+
+  useEffect(() => {
+    if (!isLoading && user && profile) {
+      if (profile.role === 'admin') {
+        navigate('/admin', { replace: true })
+      } else {
+        navigate('/dashboard', { replace: true })
+      }
+    }
+  }, [user, profile, isLoading, navigate])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

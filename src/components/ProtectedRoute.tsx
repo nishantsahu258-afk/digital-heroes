@@ -20,12 +20,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (requiredRole && profile?.role !== requiredRole) {
-    // If they need admin but are a user, redirect to user dashboard
-    if (requiredRole === 'admin') {
+    if (profile?.role === 'admin') {
+      return <Navigate to="/admin" replace />
+    } else {
       return <Navigate to="/dashboard" replace />
     }
-    // If they need user but are somehow not, redirect home (shouldn't happen with our roles)
-    return <Navigate to="/" replace />
   }
 
   return <>{children}</>

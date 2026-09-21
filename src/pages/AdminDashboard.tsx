@@ -197,7 +197,7 @@ export default function AdminDashboard() {
                 scores.map(score => (
                   <div key={score.id} className="grid grid-cols-12 gap-4 p-6 items-center transition-colors duration-150 hover:bg-foreground/5">
                     <div className="col-span-3 text-sm font-medium">{score.profiles?.full_name || 'User'}</div>
-                    <div className="col-span-3 text-sm text-foreground/70">{new Date(score.score_date).toLocaleDateString()}</div>
+                    <div className="col-span-3 text-sm text-foreground/70">{score.score_date ? new Date(score.score_date).toLocaleDateString() : 'N/A'}</div>
                     <div className="col-span-2 text-center font-bold">{score.score_value} pts</div>
                     <div className="col-span-2 text-center">
                       <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-1 rounded">Verified</span>
