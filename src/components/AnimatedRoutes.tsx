@@ -76,18 +76,31 @@ export function AnimatedRoutes() {
           <Route path="charities" element={<Charities />} />
           <Route path="charities/:id" element={<CharityDetail />} />
           <Route path="dashboard" element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           } />
           <Route path="scores" element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute>
               <Scores />
             </ProtectedRoute>
           } />
           <Route path="draws" element={<Draws />} />
-          <Route path="winner-verification" element={<WinnerVerification />} />
-          <Route path="admin" element={<AdminDashboard />} />
+          <Route path="winner-verification" element={
+            <ProtectedRoute>
+              <WinnerVerification />
+            </ProtectedRoute>
+          } />
+          <Route path="admin" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="admin/*" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
         </Route>
       </Routes>
     </AnimatePresence>

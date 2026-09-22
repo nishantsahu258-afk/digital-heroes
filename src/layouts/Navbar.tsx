@@ -94,12 +94,10 @@ export function Navbar({ dark }: NavbarProps) {
           <Link to="/charities" className={`${getLinkClass('/charities')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Charities</Link>
           <Link to="/draws" className={`${getLinkClass('/draws')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Draw Results</Link>
           <Link to="/subscribe" className={`${getLinkClass('/subscribe')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Pricing</Link>
-          {user ? (
-            <>
-              <Link to="/dashboard" className={`${getLinkClass('/dashboard')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Dashboard</Link>
-              <Link to="/admin" className={`${getLinkClass('/admin')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Admin Console</Link>
-            </>
-          ) : (
+          {user && (
+            <Link to="/dashboard" className={`${getLinkClass('/dashboard')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Dashboard</Link>
+          )}
+          {user && profile?.role === 'admin' && (
             <Link to="/admin" className={`${getLinkClass('/admin')} w-full md:w-auto`} onClick={() => setIsOpen(false)}>Admin Console</Link>
           )}
         </div>

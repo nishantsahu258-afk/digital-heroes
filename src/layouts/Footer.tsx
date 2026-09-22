@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function Footer() {
+  const { user, profile } = useAuth()
+
   return (
     <footer className="w-full bg-[#0B132B] text-white py-16 px-8 border-t border-white/10">
       <div className="max-w-7xl mx-auto flex flex-col gap-12">
@@ -32,7 +35,9 @@ export function Footer() {
               <Link to="/charities" className="text-sm text-white/80 hover:text-white transition-colors">Featured Causes</Link>
               <Link to="/draws" className="text-sm text-white/80 hover:text-white transition-colors">Donation Reports</Link>
               <Link to="/winner-verification" className="text-sm text-white/80 hover:text-white transition-colors">Winner Verification</Link>
-              <Link to="/admin" className="text-sm text-white/80 hover:text-white transition-colors">Admin Console</Link>
+              {user && profile?.role === 'admin' && (
+                <Link to="/admin" className="text-sm text-white/80 hover:text-white transition-colors">Admin Console</Link>
+              )}
             </div>
           </div>
         </div>

@@ -12,20 +12,24 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const location = useLocation()
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+        <div className="w-8 h-8 border-4 border-[#2D5A43] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (requiredRole && profile?.role !== requiredRole) {
-    if (profile?.role === 'admin') {
-      return <Navigate to="/admin" replace />
-    } else {
+  // If this route strictly requires admin, verify profile exists and role is 'admin' from database
+  if (requiredRole === 'admin') {
+    if (profile?.role !== 'admin') {
       return <Navigate to="/dashboard" replace />
     }
   }
 
   return <>{children}</>
 }
+

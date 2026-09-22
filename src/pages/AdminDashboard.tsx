@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Navbar } from '../layouts/Navbar'
 import { Footer } from '../layouts/Footer'
 import { Button } from '../components/ui/button'
@@ -12,7 +13,8 @@ import { winnerService } from '../services/winnerService'
 import { Search } from 'lucide-react'
 
 export const AdminDashboard: React.FC = () => {
-  const { profile } = useAuth()
+  const { user, profile, isLoading } = useAuth()
+  const navigate = useNavigate()
   const [dbUsers, setDbUsers] = useState<any[]>([])
   const [, setWinners] = useState<any[]>([])
   const [publishing, setPublishing] = useState(false)
@@ -20,6 +22,16 @@ export const AdminDashboard: React.FC = () => {
   const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [, setSelectedUserForAudit] = useState<any>(null)
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        navigate('/login', { replace: true })
+      } else if (profile?.role !== 'admin') {
+        navigate('/dashboard', { replace: true })
+      }
+    }
+  }, [user, profile, isLoading, navigate])
 
   const defaultPlayers = [
     {
@@ -79,7 +91,9 @@ export const AdminDashboard: React.FC = () => {
   }
 
   useEffect(() => {
-    loadData()
+    if (profile?.role === 'admin') {
+      loadData()
+    }
   }, [profile])
 
   const handlePublishDraw = async () => {
@@ -123,6 +137,14 @@ export const AdminDashboard: React.FC = () => {
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  if (isLoading || !user || profile?.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-[#0B132B] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5CD296] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#0B132B] text-white flex flex-col font-sans">
